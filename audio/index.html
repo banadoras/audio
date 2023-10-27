@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #canvas {}
+    </style>
+</head>
+
+<body>
+    <div>
+        <audio id="audio" src="relax.mp3" controls></audio>
+        <canvas id="canvas"></canvas>
+    </div>
+
+
+    <script>
+        let canvas = document.getElementById("canvas")
+        let context = canvas.getContext("2d")
+        canvas.height = 100
+        canvas.width = 200
+
+        let audio = document.getElementById("audio")
+        // audio.src = "relax.mp3"
+        // audio.play()
+
+        let audioContext = new (window.AudioContext || window.webkitAudioContext)
+        let audioSource = audioContext.createMediaElementSource(audio)
+        let analyser = audioContext.createAnalyser()
+        audioSource.connect(analyser)
+        analyser.connect(audioContext.destination)
+
+        analyser.fftSize = 128
+        const bufferLength = analyser.frequencyBinCount
+        const dataArray = new Uint8Array(bufferLength)
+        const barWidth = canvas.width / bufferLength
+        
+
+        console.log(dataArray)
+
+        let x = 0;
+        function animate() {
+            x = 0;
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            analyser.getByteFrequencyData(dataArray);
+            for (let i = 0; i < bufferLength; i++) {
+                barHeight = dataArray[i];
+                //console.log(dataArray[i])
+                //context.fillStyle = "black";
+                //context.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+                context.beginPath()
+                context.moveTo(x,canvas.height)
+                context.lineTo(x,canvas.height - (barHeight / 10) )
+                context.closePath()
+                context.stroke()
+                
+                x += barWidth;
+            }
+//context.translate(-0.1,0)
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+
+</html>
